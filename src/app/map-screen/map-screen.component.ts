@@ -251,7 +251,7 @@ export class MapScreenComponent implements OnInit {
     const coordinates = await Geolocation.getCurrentPosition();
     const popup = new maplibregl.Popup({ offset: 25 }).setHTML("<h5 style='color: black'>Your Location</h5>");
     this.clientMarker = new maplibregl.Marker({
-      element: this.createCustomMarkerElement('../../assets/your-location.webp'),
+      element: this.createCustomMarkerElement('assets/your-location.webp'),
     })
       .setLngLat([coordinates.coords.longitude, coordinates.coords.latitude])
       .setPopup(popup)
