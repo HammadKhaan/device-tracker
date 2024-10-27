@@ -1,0 +1,92 @@
+.login-screen {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #2c3e50, #1c1c3c, #111);
+    height: 100vh;
+    padding: 20px;
+    color: #fff;
+  
+    .logo-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+  
+    .logo {
+      width: 100px;
+      height: 100px;
+      animation: fadeInLogo 1.5s ease-out;
+    }
+  
+    .form-container {
+      width: 100%;
+      max-width: 400px;
+      background-color: #ffffff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+      animation: slideUpForm 1s ease-out;
+  
+      .input-item {
+        --background: transparent;
+        --color-focused: #4b79a1;
+        margin-top: 10px;
+  
+        ion-label {
+          color: #555;
+        }
+  
+        ion-input {
+          color: #333;
+        }
+      }
+  
+      .login-button {
+        margin-top: 20px;
+        background-color: #4b79a1;
+        color: #fff;
+        font-weight: bold;
+        transition: background-color 0.3s ease;
+  
+        &:hover {
+          background-color: #3b6b91;
+        }
+      }
+  
+      .link-container {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 15px;
+        font-size: 0.9rem;
+  
+        a {
+          color: #4b79a1;
+          text-decoration: none;
+          transition: color 0.3s ease;
+  
+          &:hover {
+            color: #3b6b91;
+          }
+        }
+      }
+    }
+  }
+
+.input-item > ion-label {
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+  
+  /* Animations */
+  @keyframes fadeInLogo {
+    0% { opacity: 0; transform: scale(0.8); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  
+  @keyframes slideUpForm {
+    0% { opacity: 0; transform: translateY(30px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  

@@ -1,0 +1,67 @@
+<ion-menu contentId="main-content" type="overlay" swipeGesture="false">
+  <ion-header>
+    <ion-toolbar>
+      <ion-title>All Devices</ion-title>
+      <ion-buttons slot="end">
+        <ion-button (click)="closeMenu()">
+          <ion-icon name="close-outline"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    </ion-toolbar>
+  </ion-header>
+  
+  <ion-content class="ion-padding">
+    <ul class="list">
+      <li *ngFor="let device of devicesData" style="margin-bottom: 10px;">
+        <div (click)="toggleSubMenu(device)" class="list-item">
+          <span>{{device.name}}</span>
+          <ion-icon 
+          name="chevron-down-outline" 
+          >
+        </ion-icon>
+        </div>
+  
+        <ul *ngIf="device.isExpanded" class="other-list-item">
+          <li style="padding: 5px 0;" >
+            <span style="cursor: pointer;" (click)="fetchRouteData(device.id)">Show route data</span>
+          </li>
+          <li style="padding: 5px 0;">
+            <span style="cursor: pointer;" (click)="flyToCoordinates(device.id, device.name)">Show last location</span>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  
+    <div style="padding: 10px;">
+      <span style="cursor: pointer;" (click)="fitMap()">Set map to initial state</span>
+    </div>
+    <div style="padding: 10px;">
+      <span style="cursor: pointer;" (click)="removeClientMarker()">Remove my marker</span>
+    </div>
+    <div style="padding: 10px;">
+      <span style="cursor: pointer;" (click)="addClientMarker()">Add my marker</span>
+    </div>
+  </ion-content>
+</ion-menu>
+
+<div class="ion-page" id="main-content">
+  <ion-header>
+    <ion-toolbar>
+      <ion-buttons slot="start">
+        <ion-menu-button></ion-menu-button>
+      </ion-buttons>
+      <div>
+        <ion-title class="center">Device Tracker</ion-title> 
+      </div>
+      <ion-buttons slot="end">
+        <ion-button (click)="logout()">
+          <ion-icon name="log-out-outline"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-content [fullscreen]="true">
+    <div id="map"></div>
+  </ion-content>
+</div>

@@ -1,0 +1,27 @@
+#map {
+    height: 100%;
+    width: 100%;
+}
+
+.list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    cursor: pointer
+}
+
+.center {
+    text-align: center;
+    margin-right: 50px
+}
+
+.other-list-item {
+    padding-left: 20px;
+    list-style-type: none;
+}
