@@ -32,5 +32,13 @@ This repository contains a demo application created for device tracking using a 
 ## 🛠️ How to Run the Application
 1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/your-username/your-repo-name.git
-   cd your-repo-name
+   git clone https://github.com/HammadKhaan/device-tracker.git
+   cd device-tracker
+2. **Install Dependencies**:
+    ```bash
+   npm install
+3. **Run the Development Server**:
+    ```bash
+    ionic serve
+4. **Access the App**:
+   Open your browser and navigate to your local host, where your app is running
