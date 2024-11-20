@@ -3,6 +3,10 @@
 ## 🛠️ Overview
 This repository contains a demo application created for device tracking using a mapping library MapLibre GL. The project integrates the **PAJ GPS API** to provide an interactive experience for managing GPS devices and visualizing tracking data.
 
+Quickly have a look of the app on this link: https://hammadkhaan.github.io/device-tracker/login
+- Email: testkunde@paj-gps.de
+- Password: App123%23%23%23...
+
 ## ✨ Features
 - **🔒 Login Integration**: Secure OAuth login using the PAJ GPS API.
 - **📋 Device Management**:
