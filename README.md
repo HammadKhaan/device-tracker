@@ -41,4 +41,8 @@ This repository contains a demo application created for device tracking using a 
     ```bash
     ionic serve
 4. **Access the App**:
-   Open your browser and navigate to your local host, where your app is running
+   - Open your browser and navigate to your local host, where your app is running
+     
+5. **Login Credentials**:
+   - **Email**: testkunde@paj-gps.de
+   - **Password**: App123%23%23%23...
