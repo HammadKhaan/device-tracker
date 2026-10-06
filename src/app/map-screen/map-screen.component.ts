@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ApiService } from '../services/api.service';
 import * as maplibregl from 'maplibre-gl';
-import { MenuController, NavController, Platform } from '@ionic/angular';
+import { MenuController, Platform } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { Geolocation } from '@capacitor/geolocation';
 
@@ -37,6 +37,7 @@ export class MapScreenComponent implements OnInit {
   markers: maplibregl.Marker[] = [];
   directionalMarkers: maplibregl.Marker[] = [];
   clientMarker: maplibregl.Marker | null = null;
+  private isLoadingDevices = false;
 
   constructor(
     private apiService: ApiService,
@@ -47,11 +48,11 @@ export class MapScreenComponent implements OnInit {
 
   ngOnInit() {
     this.platform.backButton.subscribeWithPriority(10, () => {
-      if (this.router.url === '/map') {
-      } else {
+      if (this.router.url !== '/map') {
         this.router.navigate(['/map']);
       }
     });
+
     this.getClientsLocation();
     this.loadDevices();
   }
@@ -68,7 +69,7 @@ export class MapScreenComponent implements OnInit {
       zoom: 4,
     });
 
-    this.map.on('error', (err: string) => {
+    this.map.on('error', () => {
       console.error('Map failed to load.');
     });
   }
@@ -76,7 +77,7 @@ export class MapScreenComponent implements OnInit {
   fitMap() {
     if (this.map?.getLayer('route-line')) {
       this.map.removeLayer('route-line');
-      this.cleardirectionalMarkers();
+      this.clearDirectionalMarkers();
       this.map.removeSource('route');
     }
     this.loadDevices();
@@ -100,11 +101,13 @@ export class MapScreenComponent implements OnInit {
   fetchRouteData(deviceId: number) {
     if (this.map?.getLayer('route-line')) {
       this.map.removeLayer('route-line');
-      this.cleardirectionalMarkers();
+      this.clearDirectionalMarkers();
       this.map.removeSource('route');
     }
+
     this.removeMarkers();
     this.closeMenu();
+
     this.apiService.getTrackingData(deviceId).subscribe(
       (response: { success: TrackingPoint[] }) => {
         if (response && response.success) {
@@ -122,13 +125,14 @@ export class MapScreenComponent implements OnInit {
     if (this.routeData.length === 0) return;
 
     const coordinates = this.routeData.map((point) => [point.lng, point.lat] as [number, number]);
+
     this.map?.addSource('route', {
       type: 'geojson',
       data: {
         type: 'Feature',
         geometry: {
           type: 'LineString',
-          coordinates: coordinates,
+          coordinates,
         },
       },
     });
@@ -166,6 +170,7 @@ export class MapScreenComponent implements OnInit {
 
       this.directionalMarkers.push(marker);
     });
+
     this.map?.flyTo({
       center: coordinates[0],
       essential: true,
@@ -173,40 +178,61 @@ export class MapScreenComponent implements OnInit {
     });
   }
 
-  cleardirectionalMarkers() {
+  clearDirectionalMarkers() {
     this.directionalMarkers.forEach((marker) => marker.remove());
     this.directionalMarkers = [];
   }
 
   loadDevices() {
-    this.apiService.getDevices().subscribe((response: { success: DeviceData[] }) => {
-      this.devicesData = response.success.map((device) => ({
-        id: device.id,
-        name: device.name,
-        isExpandable: false,
-      }));
+    if (this.isLoadingDevices) {
+      return;
+    }
 
-      this.devicesData.forEach((device) => {
-        this.loadTrackingData(device.id, device.name);
-      });
-    });
+    this.isLoadingDevices = true;
+    this.devicesLastLocation = [];
+
+    this.apiService.getDevices().subscribe(
+      (response: { success: DeviceData[] }) => {
+        this.devicesData = response.success.map((device) => ({
+          id: device.id,
+          name: device.name,
+          isExpandable: false,
+        }));
+
+        this.devicesData.forEach((device) => {
+          this.loadTrackingData(device.id, device.name);
+        });
+
+        this.isLoadingDevices = false;
+      },
+      (error) => {
+        console.error('Error loading devices:', error);
+        this.isLoadingDevices = false;
+      }
+    );
   }
 
   loadTrackingData(deviceId: number, deviceName: string) {
-    this.apiService.getTrackingData(deviceId).subscribe((response: { success: TrackingPoint[] }) => {
-      const trackingData = response.success;
+    this.apiService.getTrackingData(deviceId).subscribe(
+      (response: { success: TrackingPoint[] }) => {
+        const trackingData = response.success;
 
-      if (trackingData.length > 0) {
-        const deviceLastLocation: DeviceLastLocation = {
-          id: deviceId,
-          name: deviceName,
-          lat: trackingData[0].lat,
-          lng: trackingData[0].lng,
-        };
-        this.devicesLastLocation.push(deviceLastLocation);
-        this.addMarker(deviceLastLocation);
+        if (trackingData.length > 0) {
+          const deviceLastLocation: DeviceLastLocation = {
+            id: deviceId,
+            name: deviceName,
+            lat: trackingData[0].lat,
+            lng: trackingData[0].lng,
+          };
+
+          this.devicesLastLocation.push(deviceLastLocation);
+          this.addMarker(deviceLastLocation);
+        }
+      },
+      (error) => {
+        console.error(`Error loading tracking data for device ${deviceId}:`, error);
       }
-    });
+    );
   }
 
   addMarker(deviceLastLocation: DeviceLastLocation) {
@@ -214,10 +240,12 @@ export class MapScreenComponent implements OnInit {
     const popup = new maplibregl.Popup({ offset: 25 }).setHTML(
       `<h3 style='color: black;'>${name}</h3><p style='color: black;'>Last seen at [${lng}, ${lat}]</p>`
     );
+
     const marker = new maplibregl.Marker()
       .setLngLat([lng, lat])
       .setPopup(popup)
       .addTo(this.map as maplibregl.Map);
+
     this.markers.push(marker);
   }
 
@@ -228,12 +256,15 @@ export class MapScreenComponent implements OnInit {
 
   flyToCoordinates(deviceId: number, deviceName: string): null {
     this.loadTrackingData(deviceId, deviceName);
+
     if (this.map?.getLayer('route-line')) {
       this.map.removeLayer('route-line');
-      this.cleardirectionalMarkers();
+      this.clearDirectionalMarkers();
       this.map.removeSource('route');
     }
+
     this.closeMenu();
+
     const device = this.devicesLastLocation.find((d) => d.id === deviceId);
     if (device) {
       this.map?.flyTo({
@@ -244,19 +275,25 @@ export class MapScreenComponent implements OnInit {
     } else {
       console.error(`Device with ID ${deviceId} not found.`);
     }
+
     return null;
   }
 
   async getClientsLocation() {
-    const coordinates = await Geolocation.getCurrentPosition();
-    const popup = new maplibregl.Popup({ offset: 25 }).setHTML("<h5 style='color: black'>Your Location</h5>");
-    this.clientMarker = new maplibregl.Marker({
-      element: this.createCustomMarkerElement('assets/your-location.webp'),
-    })
-      .setLngLat([coordinates.coords.longitude, coordinates.coords.latitude])
-      .setPopup(popup)
-      .addTo(this.map as maplibregl.Map)
-      .togglePopup();
+    try {
+      const coordinates = await Geolocation.getCurrentPosition();
+      const popup = new maplibregl.Popup({ offset: 25 }).setHTML("<h5 style='color: black'>Your Location</h5>");
+
+      this.clientMarker = new maplibregl.Marker({
+        element: this.createCustomMarkerElement('assets/your-location.webp'),
+      })
+        .setLngLat([coordinates.coords.longitude, coordinates.coords.latitude])
+        .setPopup(popup)
+        .addTo(this.map as maplibregl.Map)
+        .togglePopup();
+    } catch (error) {
+      console.error('Error getting client location:', error);
+    }
   }
 
   createCustomMarkerElement(iconUrl: string): HTMLElement {
